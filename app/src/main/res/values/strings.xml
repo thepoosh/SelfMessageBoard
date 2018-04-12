@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SelfMessageBoard</string>
+    <string name="input_layout_hint">Enter Message</string>
+    <string name="button_description">this is a sending button</string>
+</resources>
