@@ -13,9 +13,11 @@ import java.util.List;
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
     final List<MessagePojo> data;
+    private final OnClickListener listener;
 
-    public MessageAdapter(List<MessagePojo> input) {
+    public MessageAdapter(List<MessagePojo> input, OnClickListener listener) {
         this.data = input;
+        this.listener = listener;
     }
 
     public void addMessage(MessagePojo msg) {
@@ -27,7 +29,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_layout, parent, false);
-        return new MessageViewHolder(view);
+        MessageViewHolder holder = new MessageViewHolder(view);
+        holder.setOnClickListener(listener);
+        return holder;
     }
 
     @Override
@@ -43,17 +47,47 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         return data.size();
     }
 
-    static class MessageViewHolder extends RecyclerView.ViewHolder {
+    public void removeItem(MessagePojo msg) {
+        for(int i = 0, size = data.size(); i < size; i++) {
+            if (msg.equals(data.get(i))) {
+                data.remove(i);
+                notifyItemRemoved(i);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("item is not in dataset");
+    }
+
+    class MessageViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         TextView content;
         TextView timestamp;
+        OnClickListener listener;
 
-        public MessageViewHolder(View itemView) {
+        MessageViewHolder(View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.name);
             content = itemView.findViewById(R.id.content);
             timestamp = itemView.findViewById(R.id.timestamp);
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (listener != null) {
+                        listener.onClick(data.get(getAdapterPosition()));
+                        return true;
+                    }
+                    return false;
+                }
+            });
         }
+
+        void setOnClickListener(OnClickListener onClickListener) {
+            this.listener = onClickListener;
+        }
+    }
+
+    interface OnClickListener {
+        void onClick(MessagePojo message);
     }
 }
 
