@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import org.json.JSONException;
@@ -20,7 +21,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MessageAdapter.OnItemClickedListener , MessageDetailsFragment.OnDelete{
     private static final String TAG = "MainActivity";
     private static final String MESSAGES = "messages";
     ImageButton mSend;
@@ -47,7 +48,8 @@ public class MainActivity extends AppCompatActivity {
         mList = findViewById(R.id.list);
 
         ArrayList<MessagePojo> input = getInput(savedInstanceState);
-        mAdapter = new MessageAdapter(input);
+        mAdapter = new MessageAdapter(input, this);
+
         mList.setAdapter(mAdapter);
         mList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
@@ -102,4 +104,18 @@ public class MainActivity extends AppCompatActivity {
         return output;
     }
 
+    @Override
+    public void onItemClicked(MessagePojo message) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(R.id.message_details_frame, MessageDetailsFragment.newInstance(message))
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void messageDeleted(MessagePojo msg) {
+        mAdapter.deleteMessage(msg);
+        getSupportFragmentManager().popBackStack();
+    }
 }
